@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestion Paiements Élèves</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+    }
+    .facture, .bilan, .form-section {
+      background-color: white;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .facture pre, .bilan pre {
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    input, button {
+      padding: 8px;
+      margin-right: 10px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📋 Gestion des Paiements des Élèves</h1>
+
+  <div class="bilan">
+    <h2>📊 Bilan des Paiements</h2>
+    <pre id="bilanText"></pre>
+  </div>
+
+  <div class="form-section">
+    <h2>💸 Ajouter un Paiement</h2>
+    <input type="text" id="nomInput" placeholder="Nom de l'élève" />
+    <input type="number" id="montantInput" placeholder="Montant" />
+    <button onclick="ajouterPaiement()">Ajouter</button>
+  </div>
+
+  <div class="facture">
+    <h2>📁 Factures Individuelles</h2>
+    <pre id="facturesText"></pre>
+  </div>
+
+  <script>
+    const eleves = [
+      { nom: "Amina", paiement: 100 },
+      { nom: "Kevin", paiement: 75 },
+      { nom: "Sarah", paiement: 100 },
+      { nom: "Junior", paiement: 50 },
+      { nom: "Rachel", paiement: 100 }
+    ];
+
+    const fraisScolaires = 100;
+
+    function afficherBilan() {
+      let totalEncaissé = 0;
+      let totalManquant = 0;
+      let enRegle = 0;
+      let enRetard = 0;
+      let bilan = "";
+
+      eleves.forEach(eleve => {
+        let reste = fraisScolaires - eleve.paiement;
+        bilan += `👨‍🎓 Élève : ${eleve.nom}\n`;
+        if (reste <= 0) {
+          bilan += "✅ Paiement COMPLET. Merci !\n";
+          enRegle++;
+        } else {
+          bilan += `❌ Paiement INCOMPLET. Il manque ${reste}$\n`;
+          enRetard++;
+          totalManquant += reste;
+        }
+        totalEncaissé += eleve.paiement;
+        bilan += "-----------------------------\n";
+      });
+
+      bilan += `\n💰 Total encaissé : ${totalEncaissé}$\n`;
+      bilan += `🚨 Total manquant : ${totalManquant}$\n`;
+      bilan += `✅ Élèves à jour : ${enRegle}\n`;
+      bilan += `⏳ Élèves en retard : ${enRetard}\n`;
+
+      document.getElementById("bilanText").textContent = bilan;
+    }
+
+    function genererFactures() {
+      let factures = "";
+      eleves.forEach(eleve => {
+        let reste = fraisScolaires - eleve.paiement;
+        factures += `📄 FACTURE : ${eleve.nom}\n`;
+        factures += `- Montant dû : ${fraisScolaires}$\n`;
+        factures += `- Montant payé : ${eleve.paiement}$\n`;
+        factures += `- Reste à payer : ${reste <= 0 ? 0 : reste}$\n`;
+        factures += "-----------------------------\n";
+      });
+      document.getElementById("facturesText").textContent = factures;
+    }
+
+    function ajouterPaiement() {
+      const nom = document.getElementById("nomInput").value.trim();
+      const montant = parseFloat(document.getElementById("montantInput").value);
+
+      if (!nom || isNaN(montant) || montant <= 0) {
+        alert("Veuillez saisir un nom valide et un montant positif.");
+        return;
+      }
+
+      const eleve = eleves.find(e => e.nom.toLowerCase() === nom.toLowerCase());
+      if (eleve) {
+        eleve.paiement += montant;
+        alert(`Paiement ajouté : ${montant}$ pour ${eleve.nom}`);
+      } else {
+        eleves.push({ nom: nom, paiement: montant });
+        alert(`Nouvel élève ajouté : ${nom}, avec ${montant}$ payé`);
+      }
+
+      afficherBilan();
+      genererFactures();
+    }
+
+    // Initialisation à l'ouverture
+    afficherBilan();
+    genererFactures();
+  </script>
+
+</body>
+</html>
